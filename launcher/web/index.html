@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>DeepSeek Harness 桌面工作台</title>
+<link rel="stylesheet" href="css/style.css?v=20260917a"></head>
+<body>
+<div id="app-shell">
+
+<!-- 全局背景层（渐变 / 图片 + 模糊） -->
+<div id="bg-layer"></div>
+<div id="bg-tint"></div>
+
+<!-- ======== 标题栏 ======== -->
+<div id="titlebar">
+  <div class="tb-left" id="tb-drag">
+    <span class="tb-logo">◈</span>
+    <span class="tb-title">DeepSeek Harness</span>
+    <span class="tb-sub">桌面工作台</span>
+  </div>
+  <div class="tb-right">
+    <span id="svc-pill" class="pill"><span class="pill-dot"></span><span id="pill-text">服务未启动</span></span>
+    <button class="tb-btn" data-win="min" title="最小化">&#xE921;</button>
+    <button class="tb-btn" data-win="max" id="btn-max" title="最大化">&#xE922;</button>
+    <button class="tb-btn tb-close" data-win="close" title="关闭">&#xE8BB;</button>
+  </div>
+</div>
+
+<!-- ======== 主体 ======== -->
+<div id="body">
+  <!-- 侧栏 -->
+  <aside id="sidebar">
+    <div class="side-brand">
+      <div class="brand-logo">◈</div>
+      <div class="brand-text"><b>DeepSeek Harness</b><span>桌面工作台 · 便携版</span></div>
+      <button class="collapse-btn" id="collapseBtn" title="收起侧栏">&#xE76B;</button>
+    </div>
+    <nav id="nav">
+      <a class="nav-item active" data-page="dashboard"><span class="nav-ico">&#xE80F;</span><span class="nav-txt">仪表盘</span></a>
+      <a class="nav-item" data-page="harness"><span class="nav-ico">&#xE9D9;</span><span class="nav-txt">Harness 工作台</span></a>
+      <a class="nav-item" data-page="models"><span class="nav-ico">&#xE945;</span><span class="nav-txt">本地模型</span></a>
+      <a class="nav-item" data-page="plugins"><span class="nav-ico">&#xE8D7;</span><span class="nav-txt">插件管理</span></a>
+      <a class="nav-item" data-page="setup"><span class="nav-ico">&#xE90F;</span><span class="nav-txt">环境配置</span></a>
+      <a class="nav-item" data-page="settings"><span class="nav-ico">&#xE713;</span><span class="nav-txt">设置</span></a>
+    </nav>
+    <div class="side-bottom">
+      <div class="side-status" id="side-status">
+        <span class="ss-dot" id="ss-dot"></span>
+        <div class="ss-text">
+          <b id="ss-title">服务未启动</b>
+          <span id="ss-sub">端口加载中…</span>
+        </div>
+        <span class="ss-caret" id="ss-caret">&#xE70D;</span>
+      </div>
+      <!-- 快捷操作面板 -->
+      <div class="side-pop hidden" id="side-pop">
+        <div class="sp-title">快捷操作</div>
+        <button class="sp-btn" id="sp-gw"><span class="sp-ico">&#xE9D9;</span><span>Harness 网关</span><b id="sp-gw-state">未启动</b></button>
+        <button class="sp-btn" id="sp-model"><span class="sp-ico">&#xE945;</span><span>本地模型</span><b id="sp-model-state">未加载</b></button>
+        <div class="sp-divider"></div>
+        <button class="sp-btn" id="sp-log"><span class="sp-ico">&#xE8D7;</span><span>运行日志</span></button>
+        <button class="sp-btn" id="sp-open"><span class="sp-ico">&#xE774;</span><span>浏览器打开</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 主内容 -->
+  <main id="main">
+
+    <!-- ===== 仪表盘 ===== -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">欢迎使用 DeepSeek Harness</h1>
+          <p class="page-sub">DeepSeek 官方 Agent Harness · 本地部署 · 模型按需加载</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn ghost" id="btn-open-browser">在浏览器打开</button>
+          <button class="btn primary" id="btn-gateway-toggle">启动服务</button>
+        </div>
+      </div>
+
+      <!-- 三张状态卡 -->
+      <div class="cards-row">
+        <div class="card status-card" id="card-gateway">
+          <div class="sc-head">
+            <span class="sc-ico gw">&#xE9D9;</span>
+            <div class="sc-titles"><b>Harness 网关</b><span>官方 Agent Harness 服务</span></div>
+            <span class="sc-badge" id="gw-badge">未启动</span>
+          </div>
+          <div class="sc-body">
+            <span class="status-dot" id="gw-dot"></span>
+            <span class="sc-state" id="gw-state">未启动</span>
+            <span class="sc-detail" id="gw-detail">http://127.0.0.1:3080</span>
+          </div>
+          <div class="sc-actions">
+            <button class="btn small primary" id="gw-start">启动</button>
+            <button class="btn small" id="gw-stop" disabled>停止</button>
+            <button class="btn small ghost" id="gw-log">查看日志</button>
+          </div>
+        </div>
+
+        <div class="card status-card" id="card-model">
+          <div class="sc-head">
+            <span class="sc-ico md">&#xE945;</span>
+            <div class="sc-titles"><b>本地模型底座</b><span>llama.cpp / Ollama</span></div>
+            <span class="sc-badge" id="md-badge">未加载</span>
+          </div>
+          <div class="sc-body">
+            <span class="status-dot" id="md-dot"></span>
+            <span class="sc-state" id="md-state">未加载</span>
+            <span class="sc-detail" id="md-detail">按需加载 · 不占用启动性能</span>
+          </div>
+          <div class="sc-actions">
+            <button class="btn small primary" id="md-start">加载模型</button>
+            <button class="btn small" id="md-stop" disabled>停止</button>
+            <button class="btn small ghost" id="md-config">配置模型</button>
+          </div>
+        </div>
+
+        <div class="card status-card" id="card-env">
+          <div class="sc-head">
+            <span class="sc-ico env">&#xE8F1;</span>
+            <div class="sc-titles"><b>运行环境</b><span>便携运行时状态</span></div>
+            <span class="sc-badge" id="env-badge">正常</span>
+          </div>
+          <div class="sc-body env-grid">
+            <div><span class="env-k">Node</span><span class="env-v" id="env-node">-</span></div>
+            <div><span class="env-k">dsh</span><span class="env-v" id="env-dsh">-</span></div>
+            <div><span class="env-k">端口</span><span class="env-v" id="env-port">-</span></div>
+          </div>
+          <div class="sc-actions">
+            <button class="btn small ghost" id="env-recheck">重新检测</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 引导面板：服务未启动时显示 -->
+      <div class="card guide-card hidden" id="guide-gateway">
+        <div class="guide-ico">&#xE9D9;</div>
+        <div class="guide-text">
+          <h3>模型底座就绪，请启动 Harness 网关</h3>
+          <p id="guide-desc">本地模型服务可按需加载。启动网关后将在此内嵌官方 Harness 界面，可一键开启对话、工具调用与 MCP 能力。</p>
+        </div>
+        <div class="guide-actions">
+          <button class="btn primary" id="guide-start">一键启动服务</button>
+          <button class="btn ghost" id="guide-log">查看日志</button>
+        </div>
+      </div>
+
+      <!-- 日志面板 -->
+      <div class="card log-card">
+        <div class="log-head">
+          <span>运行日志</span>
+          <div class="log-tools">
+            <span class="log-clear" id="log-clear">清空</span>
+            <label class="log-autoscroll"><input type="checkbox" id="log-follow" checked> 自动滚动</label>
+          </div>
+        </div>
+        <div class="log-body" id="log-body"></div>
+      </div>
+    </section>
+
+    <!-- ===== Harness 工作台 ===== -->
+    <section class="page" id="page-harness">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Harness 工作台</h1>
+          <p class="page-sub">内嵌官方 DeepSeek Agent Harness 完整界面</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn ghost" id="hx-refresh">刷新</button>
+          <button class="btn ghost" id="hx-browser">在浏览器打开</button>
+        </div>
+      </div>
+      <div class="card hx-frame-wrap">
+        <div class="hx-statusbar" id="hx-statusbar">服务未启动，启动后可在此使用官方界面</div>
+        <iframe id="hx-frame" class="hx-frame" src="about:blank"></iframe>
+      </div>
+    </section>
+
+    <!-- ===== 本地模型 ===== -->
+    <section class="page" id="page-models">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">本地模型</h1>
+          <p class="page-sub">扫描本地 GGUF 文件，对接 llama.cpp · 按需加载，不占用启动性能</p>
+        </div>
+        <div class="head-actions">
+          <span class="backend-tabs" id="backend-tabs">
+            <button class="bt active" data-backend="llama.cpp">llama.cpp</button>
+            <button class="bt" data-backend="ollama">Ollama</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="models-layout">
+        <!-- 左：模型扫描 -->
+        <div class="card model-list-card">
+          <div class="mc-head">
+            <span>本地模型文件</span>
+            <button class="btn small" id="m-browse">浏览目录</button>
+            <button class="btn small ghost" id="m-scan">重新扫描</button>
+          </div>
+          <div class="mc-dir" id="m-dir">尚未选择模型目录</div>
+          <div class="mc-list" id="m-list">
+            <div class="empty">点击「浏览目录」选择包含 GGUF 文件的文件夹</div>
+          </div>
+        </div>
+
+        <!-- 右：启动配置 -->
+        <div class="card model-cfg-card">
+          <div class="mc-head"><span id="m-cfg-title">llama.cpp 启动配置</span><span class="sc-badge" id="m-run-badge">未运行</span></div>
+
+          <div class="field" id="row-llama-dir">
+            <label>llama.cpp 目录</label>
+            <div class="field-row"><input id="m-dir-input" placeholder="如 D:\llama.cpp"><button class="btn small ghost" id="m-dir-pick">…</button></div>
+            <div class="hint" id="m-dir-hint">未检测到 llama-server.exe</div>
+          </div>
+
+          <div class="field">
+            <label>模型文件</label>
+            <input id="m-model" placeholder="选择上方 GGUF 文件或手动填写路径">
+          </div>
+
+          <div class="field-row-2">
+            <div class="field">
+              <label>上下文长度 (-c)</label>
+              <input id="m-ctx" type="number" value="4096" min="512" step="512">
+            </div>
+            <div class="field">
+              <label>GPU 层数 (-ngl)</label>
+              <input id="m-gpu" type="number" value="99" min="0">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>额外参数</label>
+            <input id="m-extra" placeholder="--threads 8 --no-mmap 等">
+          </div>
+
+          <div class="field ollama-only hidden">
+            <label>Ollama 可执行文件</label>
+            <input id="m-ollama-exe" placeholder="自动检测">
+          </div>
+          <div class="field ollama-only hidden">
+            <label>Ollama 模型名</label>
+            <input id="m-ollama-model" placeholder="如 qwen2.5:7b">
+          </div>
+
+          <div class="m-run-actions">
+            <button class="btn primary" id="m-run">启动模型</button>
+            <button class="btn" id="m-stop" disabled>停止模型</button>
+            <span class="m-run-state" id="m-run-state">未运行</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 插件管理 ===== -->
+    <section class="page" id="page-plugins">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">插件管理</h1>
+          <p class="page-sub">Harness 的能力扩展（@deepseek-ai/dsh-*）</p>
+        </div>
+        <div class="head-actions">
+          <button class="btn ghost" id="pl-refresh">刷新</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="pl-install">
+          <input id="pl-pkg" placeholder="输入插件包名，如 @deepseek-ai/dsh-openai-bridge">
+          <button class="btn primary" id="pl-install">安装</button>
+        </div>
+        <div class="pl-list" id="pl-list"><div class="empty">加载中…</div></div>
+      </div>
+      <div class="pl-recommend">
+        <div class="pl-recommend-title">推荐插件</div>
+        <div class="pl-rec-items" id="pl-rec"></div>
+      </div>
+    </section>
+
+
+    <!-- ===== 环境配置 ===== -->
+    <section class="page" id="page-setup">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">环境配置</h1>
+          <p class="page-sub">换机自动修复 · 一键配置 · 凭据加密</p>
+        </div>
+        <div class="page-actions">
+          <button class="btn primary" id="setup-run">一键配置环境</button>
+        </div>
+      </div>
+
+      <div class="card settings-card" id="setup-notes-card" style="display:none">
+        <h3>自动处理记录</h3>
+        <div id="setup-notes"></div>
+      </div>
+
+      <div class="card settings-card">
+        <h3>当前状态</h3>
+        <div class="about-row"><span>凭据存储模式</span><span id="setup-mode">-</span></div>
+        <div class="about-row"><span>凭据是否已解锁</span><span id="setup-unlocked">-</span></div>
+        <div class="about-row"><span>DeepSeek API Key</span><span id="setup-key">-</span></div>
+        <div class="about-row"><span>子进程托管 (Job Object)</span><span id="setup-job">-</span></div>
+        <div class="about-row"><span>便携 Node</span><span id="setup-node">-</span></div>
+        <div class="about-row"><span>dsh 内核</span><span id="setup-dsh">-</span></div>
+        <div class="about-row"><span>机器指纹</span><span class="mono" id="setup-machine">-</span></div>
+      </div>
+
+      <div class="card settings-card" id="setup-passcard">
+        <h3>解锁凭据</h3>
+        <div class="hint" id="setup-passhint">-</div>
+        <div class="field">
+          <label>访问口令</label>
+          <div class="field-row">
+            <input id="setup-pass" type="password" placeholder="换到新电脑时需要输入一次">
+            <button class="btn small" id="setup-unlock">解锁</button>
+            <button class="btn small ghost" id="setup-forget">忘记本机口令</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>切换存储模式</label>
+          <div class="field-row">
+            <button class="btn small" id="setup-mode-pass">设为口令模式（换机可用）</button>
+            <button class="btn small ghost" id="setup-mode-dpapi">设为本机模式（免口令）</button>
+          </div>
+          <div class="hint">
+            <b>口令模式</b>：凭据文件加密后可随盘换到任何电脑，每台新机器输入一次口令，之后该机免密。<br>
+            <b>本机模式</b>：完全免输入，但只能在本机本账户解开，换机必须重新填写密钥。<br>
+            两者磁盘上都不出现明文。想让「换机零输入」成立，解密密钥就得和密文同盘，那等于明文 —— 所以跨机必然要输一次。
+          </div>
+        </div>
+      </div>
+
+      <div class="card settings-card">
+        <h3>DeepSeek API Key</h3>
+        <div class="field">
+          <label>新密钥</label>
+          <div class="field-row">
+            <input id="setup-apikey" type="password" placeholder="粘贴新密钥（已保存的值不会回显）">
+            <button class="btn small" id="setup-savekey">保存</button>
+            <button class="btn small ghost" id="setup-clearkey">清除</button>
+          </div>
+          <div class="hint">密钥用口令派生密钥加密（或本机模式下由 DPAPI 保护）；启动服务时只以环境变量注入子进程，不写入任何配置文件。保存后会自动清理旧明文，服务运行中则自动重启生效。</div>
+        </div>
+      </div>
+
+      <div class="card settings-card">
+        <h3>上次配置结果</h3>
+        <div id="setup-report" class="setup-report"><div class="hint">尚未运行。点右上角「一键配置环境」开始。</div></div>
+      </div>
+    </section>
+
+    <!-- ===== 设置 ===== -->
+    <section class="page" id="page-settings">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">设置</h1>
+          <p class="page-sub">常规配置与外观主题</p>
+        </div>
+      </div>
+      <div class="settings-tabs" id="settings-tabs">
+        <button class="st active" data-tab="general">常规</button>
+        <button class="st" data-tab="theme">外观主题</button>
+      </div>
+
+      <!-- 常规 -->
+      <div class="settings-pane active" id="tab-general">
+        <div class="card settings-card">
+          <h3>服务</h3>
+          <div class="field">
+            <label>Harness 网关端口</label>
+            <div class="field-row"><input id="s-port" type="number" min="1024" max="65535"><button class="btn small" id="s-port-save">保存</button></div>
+            <div class="hint">支持自定义；保存后重启服务生效</div>
+          </div>
+          <div class="field">
+            <label>模型服务端口</label>
+            <div class="field-row"><input id="s-lport" type="number" min="1024" max="65535"><button class="btn small" id="s-lport-save">保存</button></div>
+          </div>
+          <div class="field">
+            <label>DeepSeek API Key</label>
+            <input id="s-apikey" type="password" placeholder="sk-…（可选，用于云端 API）">
+          </div>
+          <div class="field">
+            <label>额外模型端点 (JSON)</label>
+            <input id="s-endpoints" placeholder='[{"id":"...","base_url":"http://...","api_key":""}]'>
+          </div>
+          <div class="field switch-field">
+            <label>启动网关时自动加载本地模型</label>
+            <span class="switch" id="s-autostart"><span class="knob"></span></span>
+          </div>
+          <div class="field">
+            <button class="btn ghost" id="s-save">保存全部配置</button>
+            <span class="save-state" id="s-save-state"></span>
+          </div>
+        </div>
+        <div class="card settings-card">
+          <h3>关于</h3>
+          <div class="about-row"><span>DeepSeek Harness 桌面工作台</span><span class="mono" id="a-version">便携版</span></div>
+          <div class="about-row"><span>操作系统</span><span id="a-os">-</span></div>
+          <div class="about-row"><span>本机目录</span><span class="mono" id="a-root">-</span></div>
+        </div>
+      </div>
+
+      <!-- 外观主题 -->
+      <div class="settings-pane" id="tab-theme">
+        <div class="theme-layout">
+          <div class="card settings-card theme-presets">
+            <h3>预设主题</h3>
+            <div class="preset-grid" id="preset-grid"></div>
+          </div>
+          <div class="card settings-card theme-custom">
+            <h3>自定义</h3>
+            <div class="field">
+              <label>背景类型</label>
+              <div class="seg" id="bg-type-seg">
+                <button data-bgtype="gradient" class="active">渐变</button>
+                <button data-bgtype="image">图片</button>
+                <button data-bgtype="solid">纯色</button>
+              </div>
+            </div>
+            <div class="field" id="bg-grad-field">
+              <label>背景渐变</label>
+              <div class="field-row">
+                <input type="color" id="bg-c1" value="#1a2038">
+                <span class="sep">→</span>
+                <input type="color" id="bg-c2" value="#0e1120">
+              </div>
+            </div>
+            <div class="field hidden" id="bg-img-field">
+              <label>背景图片</label>
+              <div class="field-row">
+                <input type="file" id="bg-file" accept="image/*">
+              </div>
+            </div>
+            <div class="field hidden" id="bg-solid-field">
+              <label>背景颜色</label>
+              <input type="color" id="bg-solid" value="#0e1120">
+            </div>
+
+            <div class="field">
+              <label>背景模糊度 <span class="val" id="v-blur">14</span></label>
+              <input type="range" id="s-blur" min="0" max="40" value="14">
+            </div>
+            <div class="field">
+              <label>背景透明度 <span class="val" id="v-alpha">86</span></label>
+              <input type="range" id="s-alpha" min="20" max="100" value="86">
+            </div>
+            <div class="field">
+              <label>卡片圆角 <span class="val" id="v-radius">16</span></label>
+              <input type="range" id="s-radius" min="0" max="32" value="16">
+            </div>
+            <div class="field">
+              <label>主色调</label>
+              <input type="color" id="s-accent" value="#4f8cff">
+            </div>
+            <div class="theme-actions">
+              <button class="btn primary" id="theme-apply">应用</button>
+              <button class="btn ghost" id="theme-reset">重置为默认</button>
+              <span class="save-state" id="theme-state"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- toast -->
+<div id="toasts"></div>
+
+</div><!-- /app-shell -->
+
+<script src="js/bridge.js?v=20260917a"></script>
+<script src="js/app.js?v=20260917a"></script>
+</body>
+</html>
