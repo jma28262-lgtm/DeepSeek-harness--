@@ -30,38 +30,57 @@
 
 ## 2. 目录结构
 
+本文件同时存在于**源码仓库**与**交付包**两处，内容相同，但两边的目录布局不同。
+
+### 2.1 源码仓库（canonical source —— 改代码以这里为准）
+
 ```
-DeepSeekHarness-Launcher-Project/
-├── HANDOVER.md              ← 本文件（先读这个）
-├── VERIFICATION.md          本次改动的验证证据与未验证项（务必读 §"未验证"）
-├── README.md                项目说明
-├── OPTIMIZATION-REVIEW.md   代码审查与优化方案（含两处实测复现的 P0 缺陷）
-├── src/                     ★ 唯一权威源码（canonical source，改代码只改这里）
-│   ├── launcher/
-│   │   ├── src/*.cs         C# 源码 —— build.ps1 **只编译这个目录**
-│   │   ├── web/             WebView2 界面（index.html + js + css）
-│   │   ├── legacy/          旧版单体实现，**不参与编译**，仅存档（勿在此改 bug）
-│   │   ├── build.ps1        构建脚本（.NET Framework 4.8）
-│   │   ├── app.manifest     DPI/权限清单（**必须嵌进 exe**，见 §3.4）
-│   │   └── wv2pkg/pkg       WebView2 程序集（构建依赖，勿删）
-│   ├── scripts/             auto-config.mjs / scan-missing.mjs / start-model-server.ps1
-│   ├── config/              user.env.example（模板）/ theme.json
-│   └── *.ps1 *.bat          bootstrap / start / update / 启动
-└── dist/                    ★ 已构建好的产物（可直接运行）
+<repo>/
+├── README.md                仓库落地页
+├── LICENSE                  MIT
+├── docs/                    文档（含本文件、截图）
+│   ├── HANDOVER.md          ← 本文件（先读这个）
+│   ├── VERIFICATION.md      验证证据与「未验证」清单
+│   ├── OPTIMIZATION-REVIEW.md
+│   ├── REPO-SETUP.md
+│   └── screenshots/
+├── launcher/
+│   ├── src/*.cs             C# 源码 —— build.ps1 **只编译这个目录**
+│   ├── web/                 WebView2 界面（index.html + js + css）
+│   ├── legacy/              旧版单体实现，**不参与编译**（勿在此改 bug）
+│   ├── build.ps1            构建脚本（.NET Framework 4.8）
+│   ├── app.manifest         DPI/权限清单（**必须嵌进 exe**，见 §3.4）
+│   └── monitor.ps1          调试辅助
+├── scripts/                 auto-config.mjs / scan-missing.mjs / start-model-server.ps1
+├── config/                  user.env.example（模板）/ theme.json
+├── agent/                   mcp-re-tools.cjs
+└── bootstrap.ps1 / start.ps1 / update.ps1（+ 对应 .bat）
+```
+
+### 2.2 交付包（外接盘上的 `DeepSeekHarness-Launcher-Project\`）
+
+把上面源码仓库的**内容整体放进 `src\`**，另外附带已构建好的产物：
+
+```
+DeepSeekHarness-Launcher-Project\
+├── README.md  LICENSE
+├── docs\                    （与仓库的 docs\ 相同）
+├── src\                     ← 仓库根目录的内容整体搬到这里
+│   ├── launcher\  scripts\  config\  agent\  *.ps1  *.bat
+│   └── launcher\wv2pkg\pkg        WebView2 程序集（构建依赖，勿删）
+└── dist\                    ★ 已构建好的产物（可直接运行）
     ├── DeepSeekHarness.exe
     ├── DeepSeekHarness.exe.config
     └── *.dll                WebView2 运行时（Core / WinForms / Loader）
 ```
 
-**部署目录**（本交付包之外，与外接盘同级）：
+### 2.3 运行系统（在交付包之外，与外接盘同一层）
 
 ```
-<外接盘>\deepseek-harness\      ← 实际运行的系统（exe + tools + home + config + launcher\web）
+<外接盘>\deepseek-harness\      ← 实际运行的部署（exe + tools + home + config + launcher\web）
 ```
 
 ⚠️ **`launcher\web\` 是运行时必需品**（启动器用它做虚拟主机映射），部署目录里不能删。
-`launcher\src\`（C# 源码）在部署目录下也有一份；**权威副本是本交付包的 `src/`**，
-两边若不一致，以本包为准。
 
 ---
 
@@ -123,7 +142,7 @@ Get-Item ..\DeepSeekHarness.exe | Select-Object Length
 
 > **已知陷阱**：mono 的 `mcs` 编译器接受 `-win32manifest:` 参数、编译 `exit=0`，
 > 但**产物里根本没有清单**（静默失败）。用 `mcs` 交叉验证时请务必单独检查 `PerMonitorV2`。
-> 这也是为什么本次交付用 Roslyn csc（见 `VERIFICATION.md`）。
+> 这也是为什么本次交付用 Roslyn csc（见 [VERIFICATION.md](VERIFICATION.md)）。
 
 ### 3.5 构建后部署
 

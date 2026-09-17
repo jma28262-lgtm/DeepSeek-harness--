@@ -48,7 +48,7 @@
 3. 若提示需要口令 → 输入一次（之后该机器免密）
 4. 回仪表盘 → **启动服务** → **打开 Web UI**
 
-命令行备用入口：`start.bat`（行为与 exe 不完全等价，见 `HANDOVER.md` §6.2）。
+命令行备用入口：`start.bat`（行为与 exe 不完全等价，见 [docs/HANDOVER.md](docs/HANDOVER.md) §6.2）。
 
 ---
 
@@ -99,24 +99,42 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 
 > ⚠️ 该 `csc.exe` 只支持 **C# 5**：不要用字符串插值、`?.`、表达式体成员、`out var` 等语法。
 > ⚠️ 构建验收必须检查产物含 `PerMonitorV2`（缺了高 DPI 屏会发虚）。
-> 详细步骤与坑见 **`HANDOVER.md`**。
+> 详细步骤与坑见 **[docs/HANDOVER.md](docs/HANDOVER.md)**。
 
 ---
 
 ## 项目结构
 
 ```
-├── HANDOVER.md              给电脑端 AI 的交接说明（构建/配置/验证/回滚）
-├── VERIFICATION.md          验证证据与「未验证」清单
-├── OPTIMIZATION-REVIEW.md   代码审查报告（含实测复现的缺陷）
-├── docs/screenshots/        界面截图
-├── launcher/
-│   ├── src/                 C# 源码（build.ps1 只编译这里）
-│   ├── web/                 WebView2 界面（原生 HTML/CSS/JS，无框架）
-│   └── legacy/              旧版单体实现，不参与编译，仅存档
-├── scripts/                 auto-config.mjs / scan-missing.mjs / start-model-server.ps1
-└── config/user.env.example  配置模板（刻意不写死盘符）
+├── README.md                   本文件（仓库落地页）
+├── LICENSE                     MIT
+├── docs/                       文档（详见下方「文档」）
+│   ├── HANDOVER.md             ★ 要构建/配置/排障，先读这个
+│   ├── VERIFICATION.md         验证证据与「未验证」清单
+│   ├── OPTIMIZATION-REVIEW.md  代码审查报告（含实测复现的缺陷）
+│   ├── REPO-SETUP.md           维护者：仓库 About/Topics/首页设置建议
+│   └── screenshots/            界面截图
+├── launcher/                   启动器
+│   ├── src/                    C# 源码 —— build.ps1 **只编译这个目录**
+│   ├── web/                    WebView2 界面（原生 HTML/CSS/JS，无框架）
+│   ├── legacy/                 旧版单体实现，**不参与编译**，仅存档
+│   ├── build.ps1               构建脚本（.NET Framework 4.8）
+│   ├── app.manifest            DPI/权限清单（必须嵌进 exe）
+│   └── monitor.ps1             调试辅助：观察 exe 是否异常退出
+├── scripts/                    auto-config.mjs / scan-missing.mjs / start-model-server.ps1
+├── config/                     user.env.example（模板，刻意不写死盘符）/ theme.json
+├── agent/                      mcp-re-tools.cjs（MCP 工具服务示例）
+└── bootstrap.ps1 / start.ps1 / update.ps1（+ 对应 .bat）   部署与升级脚本
 ```
+
+## 文档
+
+| 文档 | 什么时候读 |
+|---|---|
+| [HANDOVER.md](docs/HANDOVER.md) | **要构建、配置或排障，先读这个**（含 C# 5 约束、构建验收、回滚步骤） |
+| [VERIFICATION.md](docs/VERIFICATION.md) | 想知道「哪些验证过、哪些没验证」——证据分四级标注 |
+| [OPTIMIZATION-REVIEW.md](docs/OPTIMIZATION-REVIEW.md) | 想了解已知缺陷、优化方向与架构债 |
+| [REPO-SETUP.md](docs/REPO-SETUP.md) | 维护者：About 描述 / Topics / 首页布局建议 |
 
 ---
 

@@ -69,7 +69,7 @@ README 已按"落地页"结构写好，仓库首页从上到下的阅读顺序�
 | 9 | 安全须知 | 建立信任，也是真实约束 |
 | 10 | 相关链接 | 导流到上游 |
 
-文件树本身也参与"界面"：`HANDOVER.md`、`VERIFICATION.md`、`OPTIMIZATION-REVIEW.md`
+文件树本身也参与"界面"：`docs/HANDOVER.md`、`docs/VERIFICATION.md`、`docs/OPTIMIZATION-REVIEW.md`
 放在根目录，让人一眼看到这个项目**有交接文档、有验证记录、有自我审查** ——
 这比多写三个功能更能说明工程成熟度。
 
