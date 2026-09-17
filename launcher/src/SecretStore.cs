@@ -61,6 +61,24 @@ namespace DeepSeekHarnessLauncher
         {
             lock (_lock)
             {
+                // 幂等：同一目录重复调用不得清空已有状态。
+                //
+                // 这很关键 —— SecretMigration.Run() 与 EnvironmentSetup.Run() 都会在运行期
+                // 再次 Init。若这里无条件重置，内存中的解锁密钥会被丢掉；正常路径下
+                // 随后的 Load() 能从本机解锁缓存恢复，但**缓存写不进去时（例如 DPAPI 不可用）
+                // 凭据库就会莫名变回锁定**，密钥注入与明文迁移都会静默失败。
+                bool sameDir = false;
+                try
+                {
+                    if (!string.IsNullOrEmpty(_dir) && !string.IsNullOrEmpty(configDir) && _file != null)
+                        sameDir = string.Equals(
+                            Path.GetFullPath(_dir).TrimEnd(Path.DirectorySeparatorChar),
+                            Path.GetFullPath(configDir).TrimEnd(Path.DirectorySeparatorChar),
+                            StringComparison.OrdinalIgnoreCase);
+                }
+                catch { }
+                if (sameDir) return;
+
                 _dir = configDir;
                 if (!Directory.Exists(_dir)) Directory.CreateDirectory(_dir);
                 _file = Path.Combine(_dir, "secrets.dat");
