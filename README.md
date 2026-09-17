@@ -1,4 +1,4 @@
-# DeepSeek Harness 桌面启动器
+# DeepSeek Harness 多维便携启动器
 
 > 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（`dsh`）做的 Windows 移动硬盘便携启动器：
 > 一键环境配置、换机路径自愈、凭据加密、进程树托管，并自动探测拉起本地模型服务。
