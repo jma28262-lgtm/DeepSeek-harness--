@@ -8,6 +8,7 @@
 ![lang](https://img.shields.io/badge/C%23-5.0-239120)
 ![ui](https://img.shields.io/badge/UI-WinForms%20%2B%20WebView2-2f6f4e)
 ![deps](https://img.shields.io/badge/runtime%20deps-none-brightgreen)
+![license](https://img.shields.io/badge/license-MIT-green)
 
 ---
 

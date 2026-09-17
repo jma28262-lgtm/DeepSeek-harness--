@@ -36,7 +36,7 @@
         Steps: [
           { Name: "换机检测", Status: "fixed", Detail: "检测到这是另一台电脑（机器指纹变化），已自动触发完整自检与配置修复。" },
           { Name: "运行时", Status: "ok", Detail: "便携 Node 与 dsh 内核均已就绪。" },
-          { Name: "路径自愈：DSH_LLAMA_MODEL", Status: "fixed", Detail: "原路径失效（D:\\Ollama\\Models\\gguf\\Dolphin3.0-…gguf）→ 已重定位到 E:\\Ollama\\Models\\gguf\\Dolphin3.0-…gguf" },
+          { Name: "路径自愈：DSH_LLAMA_MODEL", Status: "fixed", Detail: "原路径失效（D:\\Ollama\\Models\\gguf\\qwen2.5-7b-…gguf）→ 已重定位到 E:\\Ollama\\Models\\gguf\\qwen2.5-7b-…gguf" },
           { Name: "路径自愈：DSH_LLAMA_DIR", Status: "fixed", Detail: "原路径失效（G:\\Ollama）→ 已重定位到 E:\\Ollama" },
           { Name: "端口", Status: "ok", Detail: "端口 3080 可用。" },
           { Name: "凭据", Status: "warn", Detail: "检测到明文密钥（config\\user.env）。需要输入一次访问口令才能解锁/迁移加密凭据库。" },
@@ -44,7 +44,7 @@
         ]
       }
     };
-    var demoSecret = { mode: "Passphrase", unlocked: false, hasKey: true, hint: "sk-e8****f776", error: "", notes: [] };
+    var demoSecret = { mode: "Passphrase", unlocked: false, hasKey: true, hint: "sk-de****m000", error: "", notes: [] };
     demoEnv.secret = demoSecret;   // var 提升：demoEnv 定义在前，必须在此处补赋值
     var demoConfig = {
       DSH_PORT: "3080", DSH_AUTO_START_MODEL: "0", DSH_MODEL_BACKEND: "llama.cpp",
@@ -67,7 +67,7 @@
           { Name: "@deepseek-ai/dsh-tool-skill", Version: "0.1.0", Dir: "…" }
         ];
         case "scanGGUF": return [
-          { Path: "D:\\Ollama\\Models\\gguf\\Dolphin3.0-Llama3.1-8B.Q4_K_M.gguf", Name: "Dolphin3.0-Llama3.1-8B.Q4_K_M.gguf", SizeBytes: 4920000000 }
+          { Path: "D:\\Ollama\\Models\\gguf\\qwen2.5-7b-instruct-q4_k_m.gguf", Name: "qwen2.5-7b-instruct-q4_k_m.gguf", SizeBytes: 4920000000 }
         ];
         case "setConfig": return "（演示模式）已保存";
         case "envSetup": return demoEnv.lastSetup;

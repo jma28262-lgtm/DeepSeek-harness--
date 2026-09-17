@@ -467,7 +467,7 @@ namespace DeepSeekHarnessLauncher
             {
                 d[k] = cfg.Get(k, "");
             }
-            // 密钥绝不回传前端：只回"是否已配置"与掩码提示（例如 sk-e8***f776）
+            // 密钥绝不回传前端：只回"是否已配置"与掩码提示（例如 sk-xxxx****yyyy）
             string apiKey;
             bool hasKey = SecretStore.TryGet("DEEPSEEK_API_KEY", out apiKey) && !string.IsNullOrEmpty(apiKey);
             d["hasApiKey"] = hasKey;

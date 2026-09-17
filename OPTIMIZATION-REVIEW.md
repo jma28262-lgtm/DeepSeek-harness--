@@ -145,7 +145,7 @@ if (inRefs && t) { ... }                                                   // re
 -      api: openai-completions
 -      baseURL: "http://127.0.0.1:11435/v1"
 -      models:
--        - id: "D:\\Ollama\\Models\\gguf\\Dolphin3.0-Llama3.1-8B-abliterated.Q4_K_M.gguf"
+-        - id: "D:\\Ollama\\Models\\gguf\\qwen2.5-7b-instruct-q4_k_m.gguf"
 +    deepseek:
 +      apiKeyEnv: DEEPSEEK_API_KEY
 ```
@@ -205,7 +205,7 @@ psi.Arguments = "\"" + Paths.DshJsBin + "\" web --port " + Port + " --no-open";
 ```
 Error: failed to import loader entry attachment-local (@deepseek-ai/dsh-attachment-local):
   Cannot find package '@deepseek-ai/dsh-attachment'
-  imported from G:\deepseek-harness\tools\global\node_modules\@deepseek-ai\dsh-attachment-local\lib\index.js
+  imported from <部署目录>\tools\global\node_modules\@deepseek-ai\dsh-attachment-local\lib\index.js
 ```
 
 缺失的包（去重后 6 个）：`dsh-attachment`、`dsh-jobs`、`dsh-session-persistence`、
@@ -219,7 +219,7 @@ Error: failed to import loader entry attachment-local (@deepseek-ai/dsh-attachme
 3. `tools/global` 里那份 DSH 是"扁平安装"，缺 peer 依赖
 4. 装进来的 `dsh-mcp-client` 在启动时被加载 → import 失败 → **整个 dsh 起不来**
 
-**注意 `fix_update.js`**：这个 18 行的脚本专门去 `G:\deepseek-harness\update.ps1` 里
+**注意 `fix_update.js`**：这个 18 行的脚本专门去 `<部署目录>\update.ps1` 里
 删掉 `--legacy-peer-deps` —— 说明作者已经踩过这个坑并修了 `update.ps1`，
 但 **`Services.cs:959` 的安装路径漏了**。同一份仓库里两种 npm 调用策略并存。
 
