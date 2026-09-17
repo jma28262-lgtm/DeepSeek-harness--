@@ -28,6 +28,97 @@
 
 ---
 
+## ⚠️ 上机后先做这两件事（必做）
+
+> 这两条不做，后面大概率撞墙。按顺序执行，各自都有验收标准。
+
+### A. 修 `tools\global` 的依赖损坏 —— 否则 dsh 启动即崩
+
+**现象**（来自 `logs\app.log`，实测）：
+
+```
+Error: failed to import loader entry attachment-local:
+  Cannot find package '@deepseek-ai/dsh-attachment'
+  imported from ...\tools\global\node_modules\@deepseek-ai\dsh-attachment-local\lib\index.js
+...
+Node.js v24.19.0
+dsh 进程已退出。
+```
+
+缺失 6 个包：`dsh-attachment`、`dsh-jobs`、`dsh-settings`、`dsh-session-persistence`、
+`dsh-session-query`、`dsh-util-time`。
+
+**根因链**（三段串起来才解释得通）：
+
+1. `bootstrap.ps1` 装 dsh 时带了 `--legacy-peer-deps`（见该文件第 105 行）——
+   这会**跳过 peer 依赖解析**，于是 peer 没被装上；
+2. 项目本来设计了 `scripts\scan-missing.mjs` 在安装后扫描并补装缺失的 peer，
+   但**它此前是坏的**（默认目录写死成 `D:/deepseek-harness/...` 而调用方从不传参、
+   输出里是字面 `\n` 导致 PowerShell 的 `-like` 永不匹配、包名没拆成数组），
+   所以这段补装逻辑从未真正执行过；
+3. 结果是 `tools\global` 这棵树不完整，dsh 启动加载插件时找不到 peer → 崩溃。
+
+**好消息**：上面第 2 条的三个 bug **本仓库已全部修好**（`scan-missing.mjs` + 
+`bootstrap.ps1`/`update.ps1` 的调用处）。所以现在重装一次就能装全。
+
+**修复步骤**：
+
+```powershell
+# 1) 备份现有的（可选，出问题可回退）
+Move-Item <部署目录>\tools\global <部署目录>\tools\global.broken
+
+# 2) 重跑 bootstrap —— 它会重新装一份完整的 dsh 到 tools\global
+cd <部署目录>
+powershell -NoProfile -ExecutionPolicy Bypass -File .\bootstrap.ps1
+```
+
+> ⚠️ **必须先删/改名 `tools\global`**：`bootstrap.ps1` 里 dsh 那段是
+> `if (-not (Test-Path $dsh))` 守卫的 —— 只要 `dsh.cmd` 还在，它就会**跳过整个安装**，
+> 你跑了也等于没跑。（Node 那段同样有守卫，所以不会重复下载 Node。）
+
+**验收**：
+
+- [ ] `logs\app.log` 里不再出现 `ERR_MODULE_NOT_FOUND`
+- [ ] 启动服务后 `http://127.0.0.1:<端口>` 能出界面
+
+**顺带自查**（本仓库已修好的工具可以直接用）：
+
+```powershell
+node scripts\scan-missing.mjs <部署目录>\tools\global
+# 正常输出形如：OK: 已检查 N 个包，无缺失 peer 依赖
+# 若列出 INSTALL_LIST=...，说明仍有缺口，把后面那串包名交给 npm install 即可
+```
+
+### B. 设置新的 API Key（旧的已从部署中移除）
+
+**为什么要换**：旧密钥曾以**明文**同时存在于 `config\user.env` 与 `home\.credentials.yaml`，
+而整个部署目录随移动硬盘流动；本次审计过程中也被读取过。
+**现已把这两处的明文移除**，所以你需要重新设置一次。
+
+**步骤**：
+
+1. 到 https://platform.deepseek.com/ **作废旧密钥、生成新的** ——
+   旧的那把已经暴露过，**必须作废**，不要只是换个存放位置；
+2. 打开 `DeepSeekHarness.exe` → **环境配置** 页；
+3. 先设访问口令（≥6 位）并点「设为口令模式（换机可用）」，
+   这样凭据可随盘换机、每台新机器只需输一次口令；
+4. 在「DeepSeek API Key」填入新密钥 → **保存**。
+   密钥会用口令派生的密钥加密存放在 `config\secrets.dat`，磁盘上不出现明文；
+5. **不要**再把密钥写回 `config\user.env`。若你写了，启动器首次运行会自动把它
+   迁进加密库并从原文件抹掉。
+
+**验收**：
+
+- [ ] 环境配置页显示「已保存 sk-****」（掩码，不回显明文）
+- [ ] `config\user.env` 里**没有** `DEEPSEEK_API_KEY=` 的非空值
+- [ ] `home\.credentials.yaml` 的 `refs:` 里**没有**明文密钥
+
+> 没有 API Key 只影响**云端模型**；本地模型（llama.cpp / Ollama）不受影响。
+> 若你选了「本机模式（免口令）」，密钥将只能在本机本账户解开，**换电脑必须重填** ——
+> 要跨机可用请用口令模式。
+
+---
+
 ## 2. 目录结构
 
 本文件同时存在于**源码仓库**与**交付包**两处，内容相同，但两边的目录布局不同。
@@ -216,6 +307,8 @@ Copy-Item ..\DeepSeekHarness.exe <外接盘>\deepseek-harness\ -Force
 ## 5. 端到端验证清单
 
 按顺序勾，任一项不过就停在那里查：
+
+> **先确认「上机后先做这两件事」已过**（tools\global 依赖完整 + 新 API Key 已设），否则下面第一条就会卡住。
 
 - [ ] `build.ps1` 编译零 error → §3.4 三条验收全过
 - [ ] 双击 `deepseek-harness\DeepSeekHarness.exe` 能起来（**起不来 → 见 §7 回滚**）
